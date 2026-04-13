@@ -91,10 +91,16 @@ I tested it and worked backwards from the logic of a user using the app.
 - What behaviors did you test?
 - Why were these tests important?
 
+I tested two core unit-level behaviors and also verified the overall workflow through a demo script. First, I tested task completion by checking that mark_complete() correctly changes a task’s status from incomplete to complete. This was important because many parts of the scheduler depend on whether a task is still active, including overdue checks, filtering, and schedule views.
+
+Second, I tested task addition by verifying that adding a Task to a Pet increases the number of tasks stored for that pet. This was important because the entire system depends on tasks being correctly attached to pets before they can be retrieved and organized by the Owner and Scheduler.
+
 **b. Confidence**
 
 - How confident are you that your scheduler works correctly?
 - What edge cases would you test next if you had more time?
+I am moderately confident that the scheduler works correctly.
+If I had more time, I would test several additional edge cases: tasks due exactly at the current time, multiple recurring tasks created in sequence, duplicate pet names, pets with no tasks, and cases where completed recurring tasks should generate a new occurrence without remaining in active schedule views. I would also test conflict detection more thoroughly, especially when more than two tasks share the same due time.
 
 ---
 
@@ -103,11 +109,12 @@ I tested it and worked backwards from the logic of a user using the app.
 **a. What went well**
 
 - What part of this project are you most satisfied with?
-
+The part I am most satisfied with is the way the system architecture became clearer over time. The final design gives each class a distinct responsibility.
 **b. What you would improve**
 
 - If you had another iteration, what would you improve or redesign?
-
+If I had another iteration, I would improve the recurrence system and the overall robustness of task identification.
 **c. Key takeaway**
 
 - What is one important thing you learned about designing systems or working with AI on this project?
+AI was helpful for scaffolding class skeletons, suggesting algorithms, and drafting tests, but I still had to evaluate whether those suggestions actually fit the scale and goals of the project.

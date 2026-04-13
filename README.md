@@ -28,3 +28,32 @@ python -m pytest tests/test_pawpal.py -v
 (4/5 stars)
 
 The core scheduling features — sorting, recurrence, and conflict detection — are well-covered and all six tests pass. The rating stops short of five stars because edge cases such as weekly recurrence, cross-pet conflicts, and timezone-aware datetimes are not yet tested.
+## Features
+
+### Core Scheduling
+- **Chronological Sorting** — Tasks are automatically sorted by due date and time, enabling owners to see the clearest daily schedule
+- **Task Filtering** — Filter tasks by pet name or completion status (Pending/Completed) for focused task management
+- **Overdue Detection** — Identifies incomplete tasks past their due date and displays them with visual urgency indicators
+
+### Recurring Tasks
+- **Daily & Weekly Recurrence** — Set tasks to repeat daily or weekly; completing a recurring task automatically schedules the next occurrence
+- **Automatic Scheduling** — New recurring task instances are created with the correct due date and inherit the parent task's properties
+
+### Conflict Management
+- **Scheduling Conflict Warnings** — Detects when two or more pending tasks are assigned to the same time slot across all pets
+- **Real-time Alerts** — Displays conflict warnings in the dashboard with both task and pet details to help owners reschedule
+
+### Pet & Task Organization
+- **Multi-pet Support** — Manage care tasks for multiple pets from a single owner profile
+- **Task Lifecycle** — Mark tasks complete, reschedule, and track completion history with timestamps
+
+## Demo
+
+![PawPal+ App Screenshot](app_screenshot.png)
+
+The dashboard displays:
+- Owner information and current pets
+- Task scheduling interface
+- Conflict detection alerts
+- Today's, upcoming, and overdue task views
+- Task filtering and per-pet task lists with chronological sorting
