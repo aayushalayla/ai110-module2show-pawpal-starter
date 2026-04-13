@@ -5,7 +5,29 @@
 **a. Initial design**
 
 - Briefly describe your initial UML design.
+
+Three Core Actions: 
+User (owner who can add pets)
+Pet (type of pet)
+Scheduler - Tasks for the User (feedings, walks, medications, and appointments)
+
+The Owner owns the Pet and each Pet has Tasks associated with it. 
+The Scheduler manages the Tasks altogether for each pet. 
+
 - What classes did you include, and what responsibilities did you assign to each?
+
+The initial UML design included four core classes:
+Owner holds the attributes name, email, phone, and a list of pets.
+Its methods are add_pet(), remove_pet(), and get_all_tasks().
+
+Pet holds the attributes name, species, breed, age, and a list of tasks.
+Its methods are add_task(), get_pending_tasks(), and get_completed_tasks().
+
+Task holds title, description, due_date, is_completed, and recurrence. 
+Its methods are mark_complete(), is_overdue(), and reschedule().
+
+Scheduler holds a list of tasks. 
+Its methods are add_task(), remove_task(), get_today_tasks(), get_upcoming_tasks(), and get_overdue_tasks().
 
 **b. Design changes**
 
