@@ -9,16 +9,18 @@ cat = Pet("Luna", "cat", "tabby", 2)
 owner.add_pet(dog)
 owner.add_pet(cat)
 
+same_time = datetime.now() + timedelta(hours=1)
+
 task1 = Task(
     title="Morning Walk",
     description="Take Milo for a walk",
-    due_date=datetime.now() + timedelta(hours=1)
+    due_date=same_time
 )
 
 task2 = Task(
     title="Feed Luna",
     description="Give Luna dinner",
-    due_date=datetime.now() - timedelta(hours=2)
+    due_date=same_time
 )
 
 task3 = Task(
@@ -55,3 +57,12 @@ if overdue_tasks:
         print(f"- {task.title} (due {task.due_date.strftime('%Y-%m-%d %H:%M')})")
 else:
     print("No overdue tasks.")
+
+print("\n=== Conflict Check ===")
+conflicts = scheduler.detect_task_conflicts()
+
+if conflicts:
+    for warning in conflicts:
+        print(warning)
+else:
+    print("No conflicts detected.")

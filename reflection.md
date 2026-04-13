@@ -49,11 +49,18 @@ I kept 'remove_pet(pet_name).'
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
+My scheduler mainly considers time, completion status, pet association, recurrence, and task conflicts. 
+Time is used to sort tasks in chronological order, completion status determines whether a task should still appear in active schedules, 
+pet association allows the owner to filter care by animal, recurrence supports repeated routines such as feedings or medications, 
+and conflict detection helps identify overlapping tasks.
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+time mattered most because a scheduler is useless if it cannot order tasks
+completion status mattered next because the owner needs to distinguish active tasks from finished ones
+pet association mattered because the app supports multiple pets
 
 ---
 
@@ -62,12 +69,18 @@ I kept 'remove_pet(pet_name).'
 **a. How you used AI**
 
 - How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
+It was most helpful in responding to ideas I already had or were described in the assignment. 
 - What kinds of prompts or questions were most helpful?
+The more specific they were the more helpful they were. The explanations were also useful in justifying the choices. 
 
 **b. Judgment and verification**
 
 - Describe one moment where you did not accept an AI suggestion as-is.
+Sometimes the AI suggestions were too complex for the scale of this project. 
+The tradeoff waws between understandable code and less efficent methods for larger task lists. 
+
 - How did you evaluate or verify what the AI suggested?
+I tested it and worked backwards from the logic of a user using the app. 
 
 ---
 
