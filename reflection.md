@@ -34,6 +34,13 @@ Its methods are add_task(), remove_task(), get_today_tasks(), get_upcoming_tasks
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
 
+I changed the scheduler class so it no longer stores its own separate tasks list. 
+Scheduler now references an Owner and gathers tasks through the owner's pets. 
+This change avoids duplicates. 
+In the earlier design, tasks were in both Pet and Scheduler which would be difficuly to maintain. 
+The revised design makes the relationship clearer. 
+Owner owns pet. Pet owns Task. Scheduler is responsible for organizing and filtering tasks rather than owning them directly. 
+I kept 'remove_pet(pet_name).' 
 ---
 
 ## 2. Scheduling Logic and Tradeoffs

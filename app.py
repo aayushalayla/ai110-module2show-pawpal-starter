@@ -1,17 +1,27 @@
 import streamlit as st
+from datetime import datetime
+from pawpal_system import Owner, Pet, Task, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
+
+if "owner" not in st.session_state:
+    st.session_state["owner"] = Owner(
+        name="Sam",
+        email="sam@example.com",
+        phone="123-456-7890"
+    )
+
+owner = st.session_state["owner"]
+scheduler = Scheduler(owner)
 
 st.title("🐾 PawPal+")
 
 st.markdown(
     """
-Welcome to the PawPal+ starter app.
+Welcome to PawPal+.
 
-This file is intentionally thin. It gives you a working Streamlit app so you can start quickly,
-but **it does not implement the project logic**. Your job is to design the system and build it.
-
-Use this app as your interactive demo once your backend classes/functions exist.
+This app helps a pet owner manage pets and their care tasks.
+You can add pets, assign tasks, and view task lists.
 """
 )
 
@@ -20,69 +30,155 @@ with st.expander("Scenario", expanded=True):
         """
 **PawPal+** is a pet care planning assistant. It helps a pet owner plan care tasks
 for their pet(s) based on constraints like time, priority, and preferences.
-
-You will design and implement the scheduling logic and connect it to this Streamlit UI.
 """
     )
 
-with st.expander("What you need to build", expanded=True):
+with st.expander("What this version does", expanded=True):
     st.markdown(
         """
-At minimum, your system should:
-- Represent pet care tasks (what needs to happen, how long it takes, priority)
-- Represent the pet and the owner (basic info and preferences)
-- Build a plan/schedule for a day that chooses and orders tasks based on constraints
-- Explain the plan (why each task was chosen and when it happens)
+This version lets you:
+- Add pets
+- Add tasks to a selected pet
+- View each pet's task list
+- View today's, upcoming, and overdue tasks
 """
     )
 
 st.divider()
 
-st.subheader("Quick Demo Inputs (UI only)")
-owner_name = st.text_input("Owner name", value="Jordan")
-pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
+st.subheader("Owner Info")
+owner.name = st.text_input("Owner name", value=owner.name)
+owner.email = st.text_input("Email", value=owner.email)
+owner.phone = st.text_input("Phone", value=owner.phone)
 
-st.markdown("### Tasks")
-st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
+st.divider()
 
-if "tasks" not in st.session_state:
-    st.session_state.tasks = []
+st.subheader("Add a Pet")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    task_title = st.text_input("Task title", value="Morning walk")
-with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
-with col3:
-    priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+with st.form("add_pet_form"):
+    pet_name = st.text_input("Pet name")
+    pet_species = st.selectbox("Species", ["dog", "cat", "other"])
+    pet_breed = st.text_input("Breed")
+    pet_age = st.number_input("Age", min_value=0, max_value=50, value=1)
+    add_pet_submitted = st.form_submit_button("Add Pet")
 
-if st.button("Add task"):
-    st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
-    )
+if add_pet_submitted:
+    if pet_name.strip() and pet_breed.strip():
+        new_pet = Pet(
+            name=pet_name.strip(),
+            species=pet_species,
+            breed=pet_breed.strip(),
+            age=int(pet_age)
+        )
+        owner.add_pet(new_pet)
+        st.success(f"{pet_name} added successfully.")
+    else:
+        st.error("Please enter both a pet name and breed.")
 
-if st.session_state.tasks:
-    st.write("Current tasks:")
-    st.table(st.session_state.tasks)
+st.subheader("Current Pets")
+
+if owner.pets:
+    for pet in owner.pets:
+        st.write(f"**{pet.name}** — {pet.species}, {pet.breed}, age {pet.age}")
 else:
-    st.info("No tasks yet. Add one above.")
+    st.info("No pets added yet.")
 
 st.divider()
 
-st.subheader("Build Schedule")
-st.caption("This button should call your scheduling logic once you implement it.")
+st.subheader("Schedule a Task")
 
-if st.button("Generate schedule"):
+if owner.pets:
+    pet_names = [pet.name for pet in owner.pets]
+    selected_pet_name = st.selectbox("Choose a pet", pet_names)
+
+    selected_pet = next(p for p in owner.pets if p.name == selected_pet_name)
+
+    with st.form("add_task_form"):
+        task_title = st.text_input("Task title")
+        task_description = st.text_input("Description")
+        task_due_date = st.date_input("Due date")
+        task_due_time = st.time_input("Due time")
+        task_recurrence = st.selectbox("Recurrence", ["none", "daily", "weekly"])
+        add_task_submitted = st.form_submit_button("Add Task")
+
+    if add_task_submitted:
+        if task_title.strip() and task_description.strip():
+            due_datetime = datetime.combine(task_due_date, task_due_time)
+            recurrence_value = None if task_recurrence == "none" else task_recurrence
+
+            new_task = Task(
+                title=task_title.strip(),
+                description=task_description.strip(),
+                due_date=due_datetime,
+                recurrence=recurrence_value
+            )
+            selected_pet.add_task(new_task)
+            st.success(f"Task '{task_title}' added for {selected_pet.name}.")
+        else:
+            st.error("Please enter both a task title and description.")
+
+    st.markdown(f"### Tasks for {selected_pet.name}")
+
+    if selected_pet.tasks:
+        for i, task in enumerate(selected_pet.tasks):
+            col1, col2 = st.columns([4, 1])
+
+            with col1:
+                status = "completed" if task.is_completed else "pending"
+                overdue_text = " | overdue" if task.is_overdue() else ""
+                recurrence_text = f" | recurrence: {task.recurrence}" if task.recurrence else ""
+                st.write(
+                    f"- **{task.title}** | {task.description} | due {task.due_date.strftime('%Y-%m-%d %H:%M')} | {status}{overdue_text}{recurrence_text}"
+                )
+
+            with col2:
+                if not task.is_completed:
+                    if st.button("Complete", key=f"complete_{selected_pet.name}_{i}"):
+                        task.mark_complete()
+                        st.success(f"Marked '{task.title}' complete.")
+                        st.rerun()
+    else:
+        st.info("No tasks for this pet yet.")
+else:
+    st.info("Add a pet first before scheduling tasks.")
+
+st.divider()
+
+st.subheader("Task Dashboard")
+
+try:
+    today_tasks = scheduler.get_today_tasks()
+    upcoming_tasks = scheduler.get_upcoming_tasks()
+    overdue_tasks = scheduler.get_overdue_tasks()
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.markdown("### Today")
+        if today_tasks:
+            for task in today_tasks:
+                st.write(f"- {task.title} ({task.due_date.strftime('%H:%M')})")
+        else:
+            st.write("No tasks for today.")
+
+    with col2:
+        st.markdown("### Upcoming")
+        if upcoming_tasks:
+            for task in upcoming_tasks:
+                st.write(f"- {task.title} ({task.due_date.strftime('%Y-%m-%d %H:%M')})")
+        else:
+            st.write("No upcoming tasks.")
+
+    with col3:
+        st.markdown("### Overdue")
+        if overdue_tasks:
+            for task in overdue_tasks:
+                st.write(f"- {task.title} ({task.due_date.strftime('%Y-%m-%d %H:%M')})")
+        else:
+            st.write("No overdue tasks.")
+
+except Exception:
     st.warning(
-        "Not implemented yet. Next step: create your scheduling logic (classes/functions) and call it here."
-    )
-    st.markdown(
-        """
-Suggested approach:
-1. Design your UML (draft).
-2. Create class stubs (no logic).
-3. Implement scheduling behavior.
-4. Connect your scheduler here and display results.
-"""
+        "Your Scheduler methods may not be implemented yet. Once get_today_tasks(), "
+        "get_upcoming_tasks(), and get_overdue_tasks() are finished, this dashboard will work."
     )

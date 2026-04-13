@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, date
+from datetime import datetime
 from typing import Optional
 
 
@@ -12,18 +12,22 @@ class Task:
     due_date: datetime
     is_completed: bool = False
     recurrence: Optional[str] = None
+    completed_at: Optional[datetime] = None
 
     def mark_complete(self) -> None:
         """Mark the task as completed."""
-        pass
+        self.completed_at = datetime.now()
+        self.is_completed = True
 
-    def is_overdue(self) -> bool:
+    def is_overdue(self, current_date: Optional[datetime] = None) -> bool:
         """Return True if the task is past due and not completed."""
-        pass
+        if current_date is None:
+            current_date = datetime.now()
+        return not self.is_completed and self.due_date < current_date
 
     def reschedule(self, new_due_date: datetime) -> None:
         """Update the due date for the task."""
-        pass
+        self.due_date = new_due_date
 
 
 @dataclass
@@ -36,15 +40,15 @@ class Pet:
 
     def add_task(self, task: Task) -> None:
         """Add a new task to this pet."""
-        pass
+        self.tasks.append(task)
 
     def get_pending_tasks(self) -> list[Task]:
         """Return all incomplete tasks for this pet."""
-        pass
+        return [task for task in self.tasks if not task.is_completed]
 
     def get_completed_tasks(self) -> list[Task]:
         """Return all completed tasks for this pet."""
-        pass
+        return [task for task in self.tasks if task.is_completed]
 
 
 @dataclass
@@ -56,37 +60,44 @@ class Owner:
 
     def add_pet(self, pet: Pet) -> None:
         """Add a pet to the owner's pet list."""
-        pass
+        self.pets.append(pet)
 
     def remove_pet(self, pet_name: str) -> None:
         """Remove a pet by name."""
-        pass
+        self.pets = [pet for pet in self.pets if pet.name != pet_name]
 
     def get_all_tasks(self) -> list[Task]:
         """Return all tasks across all pets."""
-        pass
+        all_tasks = []
+        for pet in self.pets:
+            all_tasks.extend(pet.tasks)
+        return all_tasks
 
 
 @dataclass
 class Scheduler:
-    tasks: list[Task] = field(default_factory=list)
-
-    def add_task(self, task: Task) -> None:
-        """Add a task to the scheduler."""
-        pass
-
-    def remove_task(self, task_title: str) -> None:
-        """Remove a task by title."""
-        pass
+    owner: Owner
 
     def get_today_tasks(self) -> list[Task]:
-        """Return tasks due today."""
-        pass
+        """Return tasks due today from all pets."""
+        today = datetime.now().date()
+        return [
+            task for task in self.owner.get_all_tasks()
+            if task.due_date.date() == today and not task.is_completed
+        ]
 
     def get_upcoming_tasks(self) -> list[Task]:
-        """Return future tasks that are not due today."""
-        pass
+        """Return future tasks that are not due today from all pets."""
+        now = datetime.now()
+        today = now.date()
+        return [
+            task for task in self.owner.get_all_tasks()
+            if task.due_date > now and task.due_date.date() != today and not task.is_completed
+        ]
 
     def get_overdue_tasks(self) -> list[Task]:
-        """Return overdue incomplete tasks."""
-        pass
+        """Return overdue incomplete tasks from all pets."""
+        return [
+            task for task in self.owner.get_all_tasks()
+            if task.is_overdue()
+        ]
